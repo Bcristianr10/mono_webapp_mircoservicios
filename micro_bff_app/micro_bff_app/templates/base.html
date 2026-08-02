@@ -94,8 +94,49 @@
             color: var(--eduflex-muted) !important;
         }
 
-        table.table-striped > tbody > tr:nth-of-type(odd) > * {
+        .table {
+            --bs-table-bg: transparent;
+            font-variant-numeric: tabular-nums;
+        }
+        .table > thead > tr > th {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--eduflex-muted);
+            background-color: transparent;
+            border-bottom: 2px solid var(--eduflex-accent);
+            padding-top: 0.5rem;
+            padding-bottom: 0.6rem;
+            white-space: nowrap;
+        }
+        .table > tbody > tr > td,
+        .table > tbody > tr > th {
+            vertical-align: middle;
+            padding-top: 0.65rem;
+            padding-bottom: 0.65rem;
+            border-bottom-color: var(--eduflex-border);
+        }
+        .table.table-striped > tbody > tr:nth-of-type(odd) > * {
             --bs-table-accent-bg: var(--eduflex-accent-soft);
+        }
+        .table > tbody > tr {
+            transition: background-color 0.12s ease-in-out;
+        }
+        .table > tbody > tr:hover > * {
+            --bs-table-accent-bg: rgba(15, 110, 102, 0.14);
+        }
+        .table td a {
+            font-weight: 600;
+            color: var(--eduflex-text);
+            text-decoration: none;
+        }
+        .table td a:hover {
+            color: var(--eduflex-accent);
+            text-decoration: underline;
+        }
+        .table > tbody > tr:last-child > td {
+            border-bottom: none;
         }
     </style>
 </head>
