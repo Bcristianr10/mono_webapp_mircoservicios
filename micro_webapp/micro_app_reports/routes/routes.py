@@ -75,3 +75,17 @@ def course_enrollments(
         raise HTTPException(status_code=403, detail="Acceso denegado.")
 
     return logic.course_enrollment_detail(course_id, q=q, page=page, page_size=page_size)
+
+
+@reports_router.get("/api/reports/students/{user_id}/enrollments")
+def student_enrollments(
+    user_id: int,
+    q: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    token: dict = Depends(decode_token),
+):
+    if token["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Acceso denegado.")
+
+    return logic.student_enrollment_detail(user_id, q=q, page=page, page_size=page_size)

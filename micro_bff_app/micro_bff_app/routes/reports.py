@@ -77,3 +77,50 @@ def course_export_csv(course_id):
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@reports_bp.route("/reports/students/<int:user_id>")
+@login_required
+def student_detail(user_id):
+    if session.get("role") != "admin":
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "").strip()
+    page = request.args.get("page", 1, type=int)
+
+    status, data = services.get_student_enrollments(session["token"], user_id, q=q, page=page)
+    if status != 200:
+        flash("Error al cargar el detalle del estudiante.", "danger")
+        return redirect(url_for("reports.dashboard"))
+
+    return render_template("reports/student_detail.html", **data)
+
+
+@reports_bp.route("/reports/students/<int:user_id>/export.csv")
+@login_required
+def student_export_csv(user_id):
+    if session.get("role") != "admin":
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "").strip()
+    status, data = services.get_student_enrollments(
+        session["token"], user_id, q=q, page=1, page_size=1_000_000
+    )
+    if status != 200:
+        flash("Error al generar el archivo.", "danger")
+        return redirect(url_for("reports.student_detail", user_id=user_id))
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Curso", "Estado", "Fecha de matricula"])
+    for item in data["items"]:
+        writer.writerow([item["course_title"], item["status"], item["enrolled_at"]])
+
+    filename = f"matriculas_estudiante_{user_id}.csv"
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )

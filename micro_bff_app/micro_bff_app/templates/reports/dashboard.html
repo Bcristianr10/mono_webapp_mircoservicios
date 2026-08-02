@@ -172,7 +172,7 @@
                     <tbody>
                         {% for s in top_students %}
                         <tr>
-                            <td>{{ s.full_name }}</td>
+                            <td><a href="{{ url_for('reports.student_detail', user_id=s.id) }}">{{ s.full_name }}</a></td>
                             <td>{{ s.email }}</td>
                             <td>{{ s.active_enrollments }}</td>
                         </tr>
@@ -192,7 +192,10 @@
                 {% if inactive_students %}
                 <ul class="list-unstyled mb-0 small">
                     {% for u in inactive_students %}
-                    <li class="mb-1">{{ u.full_name }} <span class="text-muted">({{ u.email }})</span></li>
+                    <li class="mb-1">
+                        <a href="{{ url_for('reports.student_detail', user_id=u.id) }}">{{ u.full_name }}</a>
+                        <span class="text-muted">({{ u.email }})</span>
+                    </li>
                     {% endfor %}
                 </ul>
                 {% else %}

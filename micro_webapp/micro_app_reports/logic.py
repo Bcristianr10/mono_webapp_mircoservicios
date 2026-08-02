@@ -348,3 +348,61 @@ def course_enrollment_detail(
         "total_pages": max(1, (total + page_size - 1) // page_size),
         "query": q or "",
     }
+
+
+def student_enrollment_detail(
+    user_id: int, q: str | None = None, page: int = 1, page_size: int = 20
+) -> dict:
+    """Detalle paginado y filtrable de las matriculas de un estudiante (por titulo
+    de curso), espejo de course_enrollment_detail para la vista de drill-down."""
+    page = max(page, 1)
+    offset = (page - 1) * page_size
+
+    filters = [enrollments.c.user_id == user_id]
+    if q:
+        filters.append(courses.c.title.ilike(f"%{q}%"))
+
+    base = (
+        select(
+            enrollments.c.id,
+            courses.c.title,
+            enrollments.c.status,
+            enrollments.c.enrolled_at,
+        )
+        .select_from(enrollments)
+        .join(courses, courses.c.id == enrollments.c.course_id)
+        .where(and_(*filters))
+    )
+
+    with engine.connect() as conn:
+        total = conn.execute(select(func.count()).select_from(base.subquery())).scalar_one()
+
+        rows = conn.execute(
+            base.order_by(enrollments.c.enrolled_at.desc()).limit(page_size).offset(offset)
+        ).all()
+
+        student = conn.execute(
+            select(users.c.full_name, users.c.email).where(users.c.id == user_id)
+        ).first()
+
+    items = [
+        {
+            "enrollment_id": eid,
+            "course_title": title,
+            "status": status,
+            "enrolled_at": enrolled_at.isoformat() if enrolled_at else None,
+        }
+        for eid, title, status, enrolled_at in rows
+    ]
+
+    return {
+        "user_id": user_id,
+        "student_name": student.full_name if student else "Estudiante eliminado",
+        "student_email": student.email if student else "",
+        "items": items,
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "total_pages": max(1, (total + page_size - 1) // page_size),
+        "query": q or "",
+    }
