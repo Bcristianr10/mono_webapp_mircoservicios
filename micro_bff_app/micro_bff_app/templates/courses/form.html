@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{% if course %}Editar curso{% else %}Nuevo curso{% endif %}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">{% if course %}Editar curso{% else %}Nuevo curso{% endif %}</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Título</label>
+                <input type="text" name="title" class="form-control" required autofocus
+                    value="{{ course.title if course else '' }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea name="description" class="form-control" rows="4">{{ course.description if course else '' }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Cupo</label>
+                <input type="number" name="capacity" class="form-control" min="1" required
+                    value="{{ course.capacity if course else 30 }}">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                {% if course %}Guardar cambios{% else %}Crear curso{% endif %}
+            </button>
+            <a href="{{ url_for('courses.my_courses') }}" class="btn btn-link">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

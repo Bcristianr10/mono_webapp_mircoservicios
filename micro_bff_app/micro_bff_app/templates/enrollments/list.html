@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Mis matrículas{% endblock %}
+{% block content %}
+<h2 class="mb-4">Mis matrículas</h2>
+
+<div class="table-responsive">
+<table class="table table-striped bg-white">
+    <thead>
+        <tr>
+            <th>Curso</th>
+            <th>Inscrito desde</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in enrollments %}
+        <tr>
+            <td>{{ e.course.title if e.course else "Curso no encontrado" }}</td>
+            <td>{{ e.enrolled_at[:10] if e.enrolled_at else "—" }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('enrollments.cancel', course_id=e.course_id) }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Cancelar</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="text-center text-muted">No tienes matrículas activas.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

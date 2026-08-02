@@ -1,0 +1,16 @@
+services:
+  reverse_proxy:
+    image: jwilder/nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - TZ=UTC
+    networks:
+      - ADSL
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+networks:
+  ADSL:
+    external: true

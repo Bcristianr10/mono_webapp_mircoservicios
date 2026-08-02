@@ -1,0 +1,69 @@
+services:
+  micro_app_user:
+    build: ./micro_app_user
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - VIRTUAL_HOST=users.lms.local
+      - VIRTUAL_PORT=8001
+      - SECRET_KEY=dev-secret-key
+      - DATABASE_URL=postgresql://users_db_data:8a2auWuBOT131yz@micro_db_user:5432/micro_db_user
+      - RABBITMQ_URL=amqp://eduflex:eduflexRabbit1@rabbitmq:5672/
+    networks:
+      - ADSL
+
+  micro_app_courses:
+    build: ./micro_app_courses
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - VIRTUAL_HOST=courses.lms.local
+      - VIRTUAL_PORT=8002
+      - SECRET_KEY=dev-secret-key
+      - DATABASE_URL=postgresql://courses_db_data:2wvTyzhft81R8f6@micro_db_courses:5432/micro_db_courses
+      - ENROLLMENTS_URL=http://micro_app_enrollments:8003
+      - RABBITMQ_URL=amqp://eduflex:eduflexRabbit1@rabbitmq:5672/
+    networks:
+      - ADSL
+
+  micro_app_enrollments:
+    build: ./micro_app_enrollments
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - VIRTUAL_HOST=enrollments.lms.local
+      - VIRTUAL_PORT=8003
+      - SECRET_KEY=dev-secret-key
+      - DATABASE_URL=postgresql://enrollments_db_data:h9UY9yv2K7IZ2ED@micro_db_enrollments:5432/micro_db_enrollments
+      - COURSES_URL=http://micro_app_courses:8002
+      - RABBITMQ_URL=amqp://eduflex:eduflexRabbit1@rabbitmq:5672/
+    networks:
+      - ADSL
+
+  micro_app_reports:
+    build: ./micro_app_reports
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - VIRTUAL_HOST=reports.lms.local
+      - VIRTUAL_PORT=8004
+      - SECRET_KEY=dev-secret-key
+      - DATABASE_URL=postgresql://reports_db_data:Qw8LmZ4vRtY29Fp@micro_db_reports:5432/micro_db_reports
+    networks:
+      - ADSL
+
+  micro_app_reports_worker:
+    build: ./micro_app_reports
+    command: ["python", "worker.py"]
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - SECRET_KEY=dev-secret-key
+      - DATABASE_URL=postgresql://reports_db_data:Qw8LmZ4vRtY29Fp@micro_db_reports:5432/micro_db_reports
+      - RABBITMQ_URL=amqp://eduflex:eduflexRabbit1@rabbitmq:5672/
+    networks:
+      - ADSL
+
+networks:
+  ADSL:
+    external: true

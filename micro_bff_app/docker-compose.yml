@@ -1,0 +1,19 @@
+services:
+  micro_bff_app:
+    build: ./micro_bff_app
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - VIRTUAL_HOST=micro.lms.local
+      - VIRTUAL_PORT=8000
+      - SECRET_KEY=dev-secret-key
+      - USERS_URL=http://micro_app_user:8001
+      - COURSES_URL=http://micro_app_courses:8002
+      - ENROLLMENTS_URL=http://micro_app_enrollments:8003
+      - REPORTS_URL=http://micro_app_reports:8004
+    networks:
+      - ADSL
+
+networks:
+  ADSL:
+    external: true
