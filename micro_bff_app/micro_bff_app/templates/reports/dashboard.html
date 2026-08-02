@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <h2 class="mb-0">Panel de reportes</h2>
     <a href="{{ url_for('reports.dashboard_pdf') }}" class="btn btn-outline-primary">
-        Descargar PDF ejecutivo
+        <i class="bi bi-file-earmark-pdf"></i>Descargar PDF ejecutivo
     </a>
 </div>
 
@@ -12,7 +12,7 @@
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h6 class="text-muted">Usuarios</h6>
+                <h6 class="text-muted"><i class="bi bi-people"></i>Usuarios</h6>
                 <p class="display-6 mb-0">{{ kpis.total_users }}</p>
                 <p class="small text-muted mb-2">
                     {{ kpis.users_by_role.get("student", 0) }} estudiantes ·
@@ -28,7 +28,7 @@
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h6 class="text-muted">Cursos</h6>
+                <h6 class="text-muted"><i class="bi bi-journal-bookmark"></i>Cursos</h6>
                 <p class="display-6 mb-0">{{ kpis.courses_active }}</p>
                 <p class="small text-muted mb-0">activos · {{ kpis.courses_inactive }} desactivados</p>
             </div>
@@ -37,7 +37,7 @@
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h6 class="text-muted">Matrículas activas</h6>
+                <h6 class="text-muted"><i class="bi bi-clipboard-check"></i>Matrículas activas</h6>
                 <p class="display-6 mb-0">{{ kpis.enrollments_active }}</p>
                 <p class="small text-muted mb-0">{{ kpis.enrollments_cancelled }} canceladas</p>
             </div>
@@ -46,7 +46,7 @@
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h6 class="text-muted">Ocupación global</h6>
+                <h6 class="text-muted"><i class="bi bi-speedometer2"></i>Ocupación global</h6>
                 <p class="display-6 mb-0">{{ kpis.utilization }}%</p>
                 <p class="small text-muted mb-0">de {{ kpis.capacity_active_courses }} cupos activos</p>
             </div>
@@ -57,7 +57,7 @@
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Cursos más demandados</div>
+            <div class="card-header"><i class="bi bi-graph-up-arrow"></i>Cursos más demandados</div>
             <div class="card-body">
                 {% if top_courses %}
                 <div style="height: {{ (top_courses|length * 42) + 20 }}px;">
@@ -73,7 +73,7 @@
 
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Cursos con cupo crítico (&ge; 80%)</div>
+            <div class="card-header"><i class="bi bi-exclamation-diamond"></i>Cursos con cupo crítico (&ge; 80%)</div>
             <div class="card-body">
                 {% if at_risk_courses %}
                 <div style="height: {{ (at_risk_courses|length * 42) + 20 }}px;">
@@ -91,7 +91,7 @@
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Carga académica por docente</div>
+            <div class="card-header"><i class="bi bi-person-workspace"></i>Carga académica por docente</div>
             <div class="table-responsive">
                 <table class="table table-striped table-sm mb-0">
                     <thead>
@@ -121,7 +121,7 @@
 
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Tasa de cancelación por curso</div>
+            <div class="card-header"><i class="bi bi-pie-chart"></i>Tasa de cancelación por curso</div>
             <div class="table-responsive">
                 <table class="table table-striped table-sm mb-0">
                     <thead>
@@ -157,7 +157,7 @@
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Estudiantes más activos</div>
+            <div class="card-header"><i class="bi bi-star"></i>Estudiantes más activos</div>
             <div class="table-responsive">
                 <table class="table table-striped table-sm mb-0">
                     <thead>
@@ -185,7 +185,7 @@
 
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Estudiantes sin matrículas activas</div>
+            <div class="card-header"><i class="bi bi-person-dash"></i>Estudiantes sin matrículas activas</div>
             <div class="card-body" style="max-height: 260px; overflow-y: auto;">
                 {% if inactive_students %}
                 <ul class="list-unstyled mb-0 small">
@@ -207,7 +207,7 @@
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Matrículas nuevas por mes</div>
+            <div class="card-header"><i class="bi bi-calendar3"></i>Matrículas nuevas por mes</div>
             <div class="card-body">
                 {% if monthly_trend %}
                 <div style="height: 220px;">
@@ -222,7 +222,7 @@
 
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header">Cancelaciones por mes</div>
+            <div class="card-header"><i class="bi bi-calendar-x"></i>Cancelaciones por mes</div>
             <div class="card-body">
                 {% if cancellations_trend %}
                 <div style="height: 220px;">
@@ -239,7 +239,7 @@
 <div class="row">
     <div class="col-12 mb-4">
         <div class="card shadow-sm">
-            <div class="card-header">Cursos donde los estudiantes cancelan más rápido</div>
+            <div class="card-header"><i class="bi bi-lightning-charge"></i>Cursos donde los estudiantes cancelan más rápido</div>
             <div class="table-responsive">
                 <table class="table table-striped table-sm mb-0">
                     <thead>

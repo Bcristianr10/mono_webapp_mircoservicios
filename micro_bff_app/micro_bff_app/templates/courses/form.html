@@ -20,9 +20,9 @@
                     value="{{ course.capacity if course else 30 }}">
             </div>
             <button type="submit" class="btn btn-primary">
-                {% if course %}Guardar cambios{% else %}Crear curso{% endif %}
+                <i class="bi bi-check-lg"></i>{% if course %}Guardar cambios{% else %}Crear curso{% endif %}
             </button>
-            <a href="{{ url_for('courses.my_courses') }}" class="btn btn-link">Cancelar</a>
+            <a href="{{ url_for('courses.my_courses') }}" class="btn btn-link"><i class="bi bi-x-lg"></i>Cancelar</a>
         </form>
     </div>
 </div>

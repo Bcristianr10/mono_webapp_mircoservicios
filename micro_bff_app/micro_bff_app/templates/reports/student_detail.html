@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Matrículas de {{ student_name }}{% endblock %}
 {% block content %}
-<a href="{{ url_for('reports.dashboard') }}" class="btn btn-link mb-3">&larr; Volver a reportes</a>
+<a href="{{ url_for('reports.dashboard') }}" class="btn btn-link mb-3"><i class="bi bi-arrow-left"></i>Volver a reportes</a>
 
 <h2 class="mb-1">{{ student_name }}</h2>
 <p class="text-muted mb-4">{{ student_email }} · {{ total }} matrícula(s) en total</p>
@@ -10,10 +10,10 @@
     <form method="get" class="d-flex" role="search">
         <input type="text" name="q" value="{{ query }}" class="form-control me-2"
                placeholder="Buscar por curso">
-        <button type="submit" class="btn btn-outline-secondary">Buscar</button>
+        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i>Buscar</button>
     </form>
     <a href="{{ url_for('reports.student_export_csv', user_id=user_id, q=query) }}"
-       class="btn btn-success">Descargar CSV</a>
+       class="btn btn-success"><i class="bi bi-file-earmark-spreadsheet"></i>Descargar CSV</a>
 </div>
 
 <div class="table-responsive">

@@ -19,7 +19,7 @@
             <td>{{ e.enrolled_at[:10] if e.enrolled_at else "—" }}</td>
             <td>
                 <form method="POST" action="{{ url_for('enrollments.cancel', course_id=e.course_id) }}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Cancelar</button>
+                    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-x-circle"></i>Cancelar</button>
                 </form>
             </td>
         </tr>
