@@ -140,18 +140,30 @@
             border-bottom: none;
         }
 
-        .bi {
-            vertical-align: -0.14em;
+        .nav-link,
+        .navbar-brand,
+        .card-header,
+        .card-body h6 {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
         }
-        .nav-link .bi,
-        .btn .bi,
-        .navbar-brand .bi,
-        .card-header .bi,
-        h6 .bi {
-            margin-right: 0.4rem;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+        .alert {
+            display: flex;
+            align-items: center;
         }
         .alert .bi {
+            flex-shrink: 0;
             margin-right: 0.5rem;
+        }
+        .bi {
+            line-height: 1;
         }
     </style>
 </head>
