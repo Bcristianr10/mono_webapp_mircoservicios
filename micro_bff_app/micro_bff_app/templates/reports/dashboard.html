@@ -54,7 +54,7 @@
                 {% for c in top_courses %}
                 <div class="mb-2">
                     <div class="d-flex justify-content-between small">
-                        <span>{{ c.title }}</span>
+                        <a href="{{ url_for('reports.course_detail', course_id=c.id) }}">{{ c.title }}</a>
                         <span>{{ c.active_count }} / {{ c.capacity }} ({{ c.fill_rate }}%)</span>
                     </div>
                     <div class="progress" style="height: 6px;">
@@ -75,7 +75,7 @@
                 {% for c in at_risk_courses %}
                 <div class="mb-2">
                     <div class="d-flex justify-content-between small">
-                        <span>{{ c.title }}</span>
+                        <a href="{{ url_for('reports.course_detail', course_id=c.id) }}">{{ c.title }}</a>
                         <span class="badge bg-danger">{{ c.active_count }} / {{ c.capacity }}</span>
                     </div>
                     <div class="progress" style="height: 6px;">
@@ -137,7 +137,7 @@
                     <tbody>
                         {% for r in cancellation_report %}
                         <tr>
-                            <td>{{ r.title }}</td>
+                            <td><a href="{{ url_for('reports.course_detail', course_id=r.course_id) }}">{{ r.title }}</a></td>
                             <td>{{ r.active }}</td>
                             <td>{{ r.cancelled }}</td>
                             <td>
@@ -259,7 +259,7 @@
                     <tbody>
                         {% for r in time_to_cancel %}
                         <tr>
-                            <td>{{ r.title }}</td>
+                            <td><a href="{{ url_for('reports.course_detail', course_id=r.course_id) }}">{{ r.title }}</a></td>
                             <td>
                                 <span class="badge {{ 'bg-danger' if r.avg_days_to_cancel <= 3 else 'bg-secondary' }}">
                                     {{ r.avg_days_to_cancel }} días

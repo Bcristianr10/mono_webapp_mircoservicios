@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, or_
 
 from database.database import engine, users, courses, enrollments, enrollment_status_history
 
@@ -288,3 +288,63 @@ def avg_days_to_cancellation_by_course(limit: int = 10, min_cancellations: int =
         )
 
     return sorted(report, key=lambda r: r["avg_days_to_cancel"])[:limit]
+
+
+def course_enrollment_detail(
+    course_id: int, q: str | None = None, page: int = 1, page_size: int = 20
+) -> dict:
+    """Detalle paginado y filtrable de los matriculados de un curso, para la vista
+    de drill-down del dashboard (busqueda + paginacion + exportacion)."""
+    page = max(page, 1)
+    offset = (page - 1) * page_size
+
+    filters = [enrollments.c.course_id == course_id]
+    if q:
+        like = f"%{q}%"
+        filters.append(or_(users.c.full_name.ilike(like), users.c.email.ilike(like)))
+
+    base = (
+        select(
+            enrollments.c.id,
+            users.c.full_name,
+            users.c.email,
+            enrollments.c.status,
+            enrollments.c.enrolled_at,
+        )
+        .select_from(enrollments)
+        .join(users, users.c.id == enrollments.c.user_id)
+        .where(and_(*filters))
+    )
+
+    with engine.connect() as conn:
+        total = conn.execute(select(func.count()).select_from(base.subquery())).scalar_one()
+
+        rows = conn.execute(
+            base.order_by(enrollments.c.enrolled_at.desc()).limit(page_size).offset(offset)
+        ).all()
+
+        course_title = conn.execute(
+            select(courses.c.title).where(courses.c.id == course_id)
+        ).scalar_one_or_none()
+
+    items = [
+        {
+            "enrollment_id": eid,
+            "full_name": full_name,
+            "email": email,
+            "status": status,
+            "enrolled_at": enrolled_at.isoformat() if enrolled_at else None,
+        }
+        for eid, full_name, email, status, enrolled_at in rows
+    ]
+
+    return {
+        "course_id": course_id,
+        "course_title": course_title or "Curso eliminado",
+        "items": items,
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "total_pages": max(1, (total + page_size - 1) // page_size),
+        "query": q or "",
+    }

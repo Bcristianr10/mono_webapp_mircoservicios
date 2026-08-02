@@ -126,3 +126,16 @@ def enrollments_for_course(token, course_id):
 def get_reports_dashboard(token):
     r = httpx.get(f"{REPORTS_URL}/api/reports/dashboard", headers=_auth(token), timeout=20)
     return r.status_code, r.json()
+
+
+def get_course_enrollments(token, course_id, q="", page=1, page_size=20):
+    params = {"page": page, "page_size": page_size}
+    if q:
+        params["q"] = q
+    r = httpx.get(
+        f"{REPORTS_URL}/api/reports/courses/{course_id}/enrollments",
+        headers=_auth(token),
+        params=params,
+        timeout=10,
+    )
+    return r.status_code, r.json()

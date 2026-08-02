@@ -61,3 +61,17 @@ def dashboard(token: dict = Depends(decode_token)):
         "cancellations_trend": logic.cancellations_per_month(),
         "time_to_cancel": logic.avg_days_to_cancellation_by_course(),
     }
+
+
+@reports_router.get("/api/reports/courses/{course_id}/enrollments")
+def course_enrollments(
+    course_id: int,
+    q: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    token: dict = Depends(decode_token),
+):
+    if token["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Acceso denegado.")
+
+    return logic.course_enrollment_detail(course_id, q=q, page=page, page_size=page_size)
