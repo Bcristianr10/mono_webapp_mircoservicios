@@ -6,6 +6,8 @@ services:
       - TZ=UTC
       - RABBITMQ_DEFAULT_USER=eduflex
       - RABBITMQ_DEFAULT_PASS=eduflexRabbit1
+      - VIRTUAL_HOST=rabbitmq.lms.local
+      - VIRTUAL_PORT=15672
     ports:
       - "127.0.0.1:5672:5672"
       - "127.0.0.1:15672:15672"
