@@ -27,7 +27,12 @@
         </div>
     </div>
     {% else %}
-    <p class="text-muted">Aún no has creado ningún curso.</p>
+    <div class="col-12">
+        <div class="empty-state">
+            <i class="bi bi-journal-plus"></i>
+            <p>Aún no has creado ningún curso.</p>
+        </div>
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

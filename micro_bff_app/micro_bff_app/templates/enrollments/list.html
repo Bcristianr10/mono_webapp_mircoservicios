@@ -3,6 +3,7 @@
 {% block content %}
 <h2 class="mb-4">Mis matrículas</h2>
 
+{% if enrollments %}
 <div class="table-responsive">
 <table class="table table-striped bg-white">
     <thead>
@@ -23,10 +24,14 @@
                 </form>
             </td>
         </tr>
-        {% else %}
-        <tr><td colspan="3" class="text-center text-muted">No tienes matrículas activas.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 </div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-clipboard-x"></i>
+    <p>No tienes matrículas activas.</p>
+</div>
+{% endif %}
 {% endblock %}

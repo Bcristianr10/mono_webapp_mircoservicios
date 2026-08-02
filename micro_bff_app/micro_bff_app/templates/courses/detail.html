@@ -29,6 +29,7 @@
 
 {% if students is not none %}
 <h3 class="mt-4">Estudiantes inscritos</h3>
+{% if students %}
 <div class="table-responsive">
 <table class="table table-striped bg-white">
     <thead>
@@ -43,11 +44,15 @@
             <td>{{ student.full_name }}</td>
             <td>{{ student.email }}</td>
         </tr>
-        {% else %}
-        <tr><td colspan="2" class="text-center text-muted">Aún no hay estudiantes inscritos.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 </div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-person-x"></i>
+    <p>Aún no hay estudiantes inscritos.</p>
+</div>
+{% endif %}
 {% endif %}
 {% endblock %}

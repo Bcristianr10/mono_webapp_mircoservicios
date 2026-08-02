@@ -26,7 +26,12 @@
         </div>
     </div>
     {% else %}
-    <p class="text-muted">No hay cursos activos por ahora.</p>
+    <div class="col-12">
+        <div class="empty-state">
+            <i class="bi bi-journal-x"></i>
+            <p>No hay cursos activos por ahora.</p>
+        </div>
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

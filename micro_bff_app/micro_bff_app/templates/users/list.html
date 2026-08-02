@@ -2,6 +2,7 @@
 {% block title %}Usuarios{% endblock %}
 {% block content %}
 <h2 class="mb-4">Usuarios</h2>
+{% if users %}
 <div class="table-responsive">
 <table class="table table-striped bg-white">
     <thead>
@@ -20,10 +21,14 @@
             <td><span class="badge bg-secondary">{{ role_labels.get(u.role, u.role) }}</span></td>
             <td>{{ u.created_at[:10] if u.created_at else "—" }}</td>
         </tr>
-        {% else %}
-        <tr><td colspan="4" class="text-center text-muted">No hay usuarios.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 </div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-people"></i>
+    <p>No hay usuarios.</p>
+</div>
+{% endif %}
 {% endblock %}
