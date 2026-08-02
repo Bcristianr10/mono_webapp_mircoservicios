@@ -1,5 +1,7 @@
+import base64
 import csv
 import io
+import os
 from datetime import datetime
 from functools import wraps
 
@@ -8,6 +10,14 @@ from flask import Blueprint, Response, flash, redirect, render_template, request
 from weasyprint import HTML
 
 reports_bp = Blueprint("reports", __name__)
+
+_LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "static", "logo-full.png")
+
+
+def _logo_data_uri():
+    with open(_LOGO_PATH, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
 
 
 def login_required(f):
@@ -49,6 +59,7 @@ def dashboard_pdf():
     html = render_template(
         "reports/dashboard_pdf.html",
         generated_at=datetime.now().strftime("%d/%m/%Y %H:%M"),
+        logo_data_uri=_logo_data_uri(),
         **data,
     )
     pdf_bytes = HTML(string=html).write_pdf()

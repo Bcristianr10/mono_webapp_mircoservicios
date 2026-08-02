@@ -74,6 +74,10 @@
         .navbar-brand {
             font-weight: 700;
         }
+        .navbar-logo-img {
+            height: 34px;
+            width: auto;
+        }
 
         .card {
             margin-bottom: 1rem;
@@ -218,7 +222,9 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-eduflex mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}"><i class="bi bi-mortarboard-fill"></i>Gestión de Matrículas</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='logo-navbar-white.png') }}" alt="Eduflex" class="navbar-logo-img">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
