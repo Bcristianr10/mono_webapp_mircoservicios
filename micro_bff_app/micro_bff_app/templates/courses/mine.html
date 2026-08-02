@@ -9,7 +9,7 @@
 <div class="row">
     {% for c in courses %}
     <div class="col-md-4">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm course-card">
             <div class="card-body">
                 <h5 class="card-title">
                     {{ c.title }}
@@ -18,9 +18,15 @@
                     {% endif %}
                 </h5>
                 <p class="card-text">{{ c.description or "Sin descripción." }}</p>
-                <p class="text-muted small">
-                    Cupo: {{ enrolled_counts.get(c.id, 0) }} / {{ c.capacity }}
-                </p>
+                {% set enrolled = enrolled_counts.get(c.id, 0) %}
+                {% set fill = (enrolled / c.capacity * 100) if c.capacity else 0 %}
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Cupo</span>
+                    <span>{{ enrolled }} / {{ c.capacity }}</span>
+                </div>
+                <div class="progress mb-3" style="height: 6px;">
+                    <div class="progress-bar {{ 'bg-danger' if fill >= 80 else '' }}" role="progressbar" style="width: {{ fill }}%;"></div>
+                </div>
                 <a href="{{ url_for('courses.detail', course_id=c.id) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i>Ver detalle</a>
                 <a href="{{ url_for('courses.edit_course', course_id=c.id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i>Editar</a>
             </div>
