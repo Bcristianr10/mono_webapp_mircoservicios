@@ -2,3 +2,4 @@ flask
 httpx
 pyjwt
 gunicorn
+weasyprint

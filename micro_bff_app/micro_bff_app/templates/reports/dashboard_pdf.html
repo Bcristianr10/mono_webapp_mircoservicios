@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte Eduflex</title>
+<style>
+    @page {
+        size: A4;
+        margin: 2cm 1.6cm;
+        @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #64767A; }
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'DejaVu Sans', 'Inter', sans-serif;
+        color: #1C2426;
+        font-size: 10.5pt;
+    }
+    h1 { font-size: 18pt; margin: 0 0 2pt 0; color: #0F6E66; }
+    h2 { font-size: 12.5pt; margin: 18pt 0 6pt 0; color: #1C2426; border-bottom: 1.5pt solid #E1E7E8; padding-bottom: 3pt; }
+    .subtitle { color: #64767A; font-size: 9.5pt; margin-bottom: 14pt; }
+    .kpi-row { display: flex; gap: 10pt; margin-bottom: 6pt; }
+    .kpi { flex: 1; border: 1pt solid #E1E7E8; border-radius: 4pt; padding: 8pt 10pt; }
+    .kpi .label { font-size: 8.5pt; color: #64767A; text-transform: uppercase; letter-spacing: 0.03em; }
+    .kpi .value { font-size: 17pt; font-weight: 700; color: #0F6E66; }
+    .kpi .detail { font-size: 8.5pt; color: #64767A; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 4pt; }
+    th, td { text-align: left; padding: 4pt 6pt; border-bottom: 0.75pt solid #E1E7E8; font-size: 9.5pt; }
+    th { background-color: #E5F2F0; color: #0B5852; font-weight: 600; }
+    tr:nth-child(even) td { background-color: #FAFBFB; }
+
+    .bar-row { display: flex; align-items: center; margin-bottom: 5pt; }
+    .bar-label { width: 30%; font-size: 9pt; padding-right: 6pt; }
+    .bar-track { flex: 1; background-color: #EEF1F1; border-radius: 3pt; height: 9pt; position: relative; }
+    .bar-fill { background-color: #0F6E66; height: 9pt; border-radius: 3pt; }
+    .bar-fill.danger { background-color: #B54432; }
+    .bar-value { width: 15%; text-align: right; font-size: 8.5pt; color: #64767A; padding-left: 6pt; }
+
+    .two-col { display: flex; gap: 20pt; }
+    .two-col > div { flex: 1; }
+    .muted { color: #64767A; font-size: 9pt; }
+    .badge { display: inline-block; padding: 1pt 6pt; border-radius: 8pt; font-size: 8pt; color: #fff; }
+    .badge.ok { background-color: #4A9A92; }
+    .badge.danger { background-color: #B54432; }
+</style>
+</head>
+<body>
+    <h1>Reporte ejecutivo — Eduflex</h1>
+    <p class="subtitle">Generado el {{ generated_at }}</p>
+
+    <div class="kpi-row">
+        <div class="kpi">
+            <div class="label">Usuarios</div>
+            <div class="value">{{ kpis.total_users }}</div>
+            <div class="detail">{{ kpis.users_by_role.get("student", 0) }} estudiantes · {{ kpis.users_by_role.get("instructor", 0) }} docentes · {{ kpis.users_by_role.get("admin", 0) }} admins</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Cursos</div>
+            <div class="value">{{ kpis.courses_active }}</div>
+            <div class="detail">activos · {{ kpis.courses_inactive }} desactivados</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Matrículas activas</div>
+            <div class="value">{{ kpis.enrollments_active }}</div>
+            <div class="detail">{{ kpis.enrollments_cancelled }} canceladas</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Ocupación global</div>
+            <div class="value">{{ kpis.utilization }}%</div>
+            <div class="detail">de {{ kpis.capacity_active_courses }} cupos activos</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div>
+            <h2>Cursos más demandados</h2>
+            {% for c in top_courses %}
+            <div class="bar-row">
+                <div class="bar-label">{{ c.title }}</div>
+                <div class="bar-track"><div class="bar-fill" style="width: {{ c.fill_rate }}%;"></div></div>
+                <div class="bar-value">{{ c.active_count }}/{{ c.capacity }}</div>
+            </div>
+            {% else %}
+            <p class="muted">No hay cursos activos.</p>
+            {% endfor %}
+        </div>
+        <div>
+            <h2>Cupo crítico (&ge;80%)</h2>
+            {% for c in at_risk_courses %}
+            <div class="bar-row">
+                <div class="bar-label">{{ c.title }}</div>
+                <div class="bar-track"><div class="bar-fill danger" style="width: {{ c.fill_rate }}%;"></div></div>
+                <div class="bar-value">{{ c.active_count }}/{{ c.capacity }}</div>
+            </div>
+            {% else %}
+            <p class="muted">Ningún curso está cerca de su cupo máximo.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <h2>Carga académica por docente</h2>
+    <table>
+        <thead><tr><th>Docente</th><th>Cursos activos</th><th>Estudiantes</th><th>Ocupación prom.</th></tr></thead>
+        <tbody>
+            {% for w in instructor_workload %}
+            <tr><td>{{ w.instructor_name }}</td><td>{{ w.course_count }}</td><td>{{ w.total_students }}</td><td>{{ w.avg_fill_rate }}%</td></tr>
+            {% else %}
+            <tr><td colspan="4" class="muted">Sin datos.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Tasa de cancelación por curso</h2>
+    <table>
+        <thead><tr><th>Curso</th><th>Activas</th><th>Canceladas</th><th>% cancelación</th></tr></thead>
+        <tbody>
+            {% for r in cancellation_report %}
+            <tr>
+                <td>{{ r.title }}</td><td>{{ r.active }}</td><td>{{ r.cancelled }}</td>
+                <td><span class="badge {{ 'danger' if r.cancellation_rate >= 30 else 'ok' }}">{{ r.cancellation_rate }}%</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="muted">Sin cancelaciones registradas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="two-col">
+        <div>
+            <h2>Estudiantes más activos</h2>
+            <table>
+                <thead><tr><th>Nombre</th><th>Correo</th><th>Matrículas</th></tr></thead>
+                <tbody>
+                    {% for s in top_students %}
+                    <tr><td>{{ s.full_name }}</td><td>{{ s.email }}</td><td>{{ s.active_enrollments }}</td></tr>
+                    {% else %}
+                    <tr><td colspan="3" class="muted">Sin datos.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h2>Sin matrículas activas</h2>
+            {% if inactive_students %}
+            <ul>
+                {% for u in inactive_students %}
+                <li>{{ u.full_name }} <span class="muted">({{ u.email }})</span></li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="muted">Todos los estudiantes tienen al menos una matrícula activa.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div>
+            <h2>Matrículas nuevas por mes</h2>
+            {% for m in monthly_trend %}
+            <div class="bar-row">
+                <div class="bar-label">{{ m.month }}</div>
+                <div class="bar-track"><div class="bar-fill" style="width: {{ m.bar_width }}%;"></div></div>
+                <div class="bar-value">{{ m.count }}</div>
+            </div>
+            {% else %}
+            <p class="muted">No hay matrículas registradas todavía.</p>
+            {% endfor %}
+        </div>
+        <div>
+            <h2>Cancelaciones por mes</h2>
+            {% for m in cancellations_trend %}
+            <div class="bar-row">
+                <div class="bar-label">{{ m.month }}</div>
+                <div class="bar-track"><div class="bar-fill danger" style="width: {{ m.bar_width }}%;"></div></div>
+                <div class="bar-value">{{ m.count }}</div>
+            </div>
+            {% else %}
+            <p class="muted">No hay cancelaciones registradas todavía.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <h2>Cursos donde los estudiantes cancelan más rápido</h2>
+    <table>
+        <thead><tr><th>Curso</th><th>Días promedio hasta cancelar</th><th>Cancelaciones</th></tr></thead>
+        <tbody>
+            {% for r in time_to_cancel %}
+            <tr>
+                <td>{{ r.title }}</td>
+                <td><span class="badge {{ 'danger' if r.avg_days_to_cancel <= 3 else 'ok' }}">{{ r.avg_days_to_cancel }} días</span></td>
+                <td>{{ r.cancellations }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="muted">Aún no hay suficientes datos.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -5,14 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Gestión de Matrículas{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-weight: 600; }
-        .card { margin-bottom: 1rem; }
+        :root {
+            --eduflex-bg: #F5F7F8;
+            --eduflex-surface: #FFFFFF;
+            --eduflex-text: #1C2426;
+            --eduflex-muted: #64767A;
+            --eduflex-border: #E1E7E8;
+            --eduflex-accent: #0F6E66;
+            --eduflex-accent-dark: #0B5852;
+            --eduflex-accent-soft: #E5F2F0;
+
+            --bs-body-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --bs-body-bg: var(--eduflex-bg);
+            --bs-body-color: var(--eduflex-text);
+            --bs-border-color: var(--eduflex-border);
+            --bs-border-radius: 0.5rem;
+            --bs-border-radius-sm: 0.4rem;
+            --bs-border-radius-lg: 0.65rem;
+            --bs-primary: var(--eduflex-accent);
+            --bs-primary-rgb: 15, 110, 102;
+            --bs-link-color: var(--eduflex-accent);
+            --bs-link-color-rgb: 15, 110, 102;
+            --bs-link-hover-color: var(--eduflex-accent-dark);
+            --bs-link-hover-color-rgb: 11, 88, 82;
+            --bs-secondary-color: var(--eduflex-muted);
+        }
+
+        body {
+            letter-spacing: 0.01em;
+        }
+
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+            letter-spacing: 0;
+        }
+
+        .navbar-eduflex {
+            background-color: var(--eduflex-accent);
+        }
+        .navbar-eduflex .nav-link,
+        .navbar-eduflex .navbar-brand {
+            color: rgba(255, 255, 255, 0.92) !important;
+        }
+        .navbar-eduflex .nav-link:hover {
+            color: #FFFFFF !important;
+        }
+        .navbar-brand {
+            font-weight: 700;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+            border-color: var(--eduflex-border);
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+        .card-header {
+            background-color: var(--eduflex-surface);
+            font-weight: 600;
+            border-bottom-color: var(--eduflex-border);
+        }
+
+        .btn-primary {
+            --bs-btn-bg: var(--eduflex-accent);
+            --bs-btn-border-color: var(--eduflex-accent);
+            --bs-btn-hover-bg: var(--eduflex-accent-dark);
+            --bs-btn-hover-border-color: var(--eduflex-accent-dark);
+            --bs-btn-active-bg: var(--eduflex-accent-dark);
+            --bs-btn-active-border-color: var(--eduflex-accent-dark);
+        }
+        .btn-outline-primary {
+            --bs-btn-color: var(--eduflex-accent);
+            --bs-btn-border-color: var(--eduflex-accent);
+            --bs-btn-hover-bg: var(--eduflex-accent);
+            --bs-btn-hover-border-color: var(--eduflex-accent);
+        }
+        .btn-success {
+            --bs-btn-bg: #1C8C7A;
+            --bs-btn-border-color: #1C8C7A;
+            --bs-btn-hover-bg: #166F62;
+            --bs-btn-hover-border-color: #166F62;
+        }
+
+        .text-muted {
+            color: var(--eduflex-muted) !important;
+        }
+
+        table.table-striped > tbody > tr:nth-of-type(odd) > * {
+            --bs-table-accent-bg: var(--eduflex-accent-soft);
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-eduflex mb-4">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">Gestión de Matrículas</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">

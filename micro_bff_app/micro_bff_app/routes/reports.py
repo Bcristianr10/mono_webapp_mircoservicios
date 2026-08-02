@@ -1,9 +1,11 @@
 import csv
 import io
+from datetime import datetime
 from functools import wraps
 
 import services
 from flask import Blueprint, Response, flash, redirect, render_template, request, session, url_for
+from weasyprint import HTML
 
 reports_bp = Blueprint("reports", __name__)
 
@@ -30,6 +32,32 @@ def dashboard():
         return redirect(url_for("index"))
 
     return render_template("reports/dashboard.html", **data)
+
+
+@reports_bp.route("/reports/export.pdf")
+@login_required
+def dashboard_pdf():
+    if session.get("role") != "admin":
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for("index"))
+
+    status, data = services.get_reports_dashboard(session["token"])
+    if status != 200:
+        flash("Error al generar el PDF.", "danger")
+        return redirect(url_for("reports.dashboard"))
+
+    html = render_template(
+        "reports/dashboard_pdf.html",
+        generated_at=datetime.now().strftime("%d/%m/%Y %H:%M"),
+        **data,
+    )
+    pdf_bytes = HTML(string=html).write_pdf()
+
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=reporte_eduflex.pdf"},
+    )
 
 
 @reports_bp.route("/reports/courses/<int:course_id>")

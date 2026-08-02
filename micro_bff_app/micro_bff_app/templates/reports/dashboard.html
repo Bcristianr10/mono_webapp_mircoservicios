@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Reportes{% endblock %}
 {% block content %}
-<h2 class="mb-4">Panel de reportes</h2>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <h2 class="mb-0">Panel de reportes</h2>
+    <a href="{{ url_for('reports.dashboard_pdf') }}" class="btn btn-outline-primary">
+        Descargar PDF ejecutivo
+    </a>
+</div>
 
 <div class="row mb-4">
     <div class="col-md-3 mb-3">
@@ -9,11 +14,14 @@
             <div class="card-body">
                 <h6 class="text-muted">Usuarios</h6>
                 <p class="display-6 mb-0">{{ kpis.total_users }}</p>
-                <p class="small text-muted mb-0">
+                <p class="small text-muted mb-2">
                     {{ kpis.users_by_role.get("student", 0) }} estudiantes ·
                     {{ kpis.users_by_role.get("instructor", 0) }} docentes ·
                     {{ kpis.users_by_role.get("admin", 0) }} admins
                 </p>
+                <div style="height: 90px;">
+                    <canvas id="chartUsersByRole"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -51,19 +59,14 @@
         <div class="card shadow-sm h-100">
             <div class="card-header">Cursos más demandados</div>
             <div class="card-body">
-                {% for c in top_courses %}
-                <div class="mb-2">
-                    <div class="d-flex justify-content-between small">
-                        <a href="{{ url_for('reports.course_detail', course_id=c.id) }}">{{ c.title }}</a>
-                        <span>{{ c.active_count }} / {{ c.capacity }} ({{ c.fill_rate }}%)</span>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar" role="progressbar" style="width: {{ c.fill_rate }}%;"></div>
-                    </div>
+                {% if top_courses %}
+                <div style="height: {{ (top_courses|length * 42) + 20 }}px;">
+                    <canvas id="chartTopCourses"></canvas>
                 </div>
+                <p class="small text-muted mt-2 mb-0">Click en una barra para ver el detalle del curso.</p>
                 {% else %}
                 <p class="text-muted mb-0">No hay cursos activos.</p>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -72,19 +75,14 @@
         <div class="card shadow-sm h-100">
             <div class="card-header">Cursos con cupo crítico (&ge; 80%)</div>
             <div class="card-body">
-                {% for c in at_risk_courses %}
-                <div class="mb-2">
-                    <div class="d-flex justify-content-between small">
-                        <a href="{{ url_for('reports.course_detail', course_id=c.id) }}">{{ c.title }}</a>
-                        <span class="badge bg-danger">{{ c.active_count }} / {{ c.capacity }}</span>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ c.fill_rate }}%;"></div>
-                    </div>
+                {% if at_risk_courses %}
+                <div style="height: {{ (at_risk_courses|length * 42) + 20 }}px;">
+                    <canvas id="chartAtRiskCourses"></canvas>
                 </div>
+                <p class="small text-muted mt-2 mb-0">Click en una barra para ver el detalle del curso.</p>
                 {% else %}
                 <p class="text-muted mb-0">Ningún curso activo está cerca de su cupo máximo.</p>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -211,17 +209,13 @@
         <div class="card shadow-sm h-100">
             <div class="card-header">Matrículas nuevas por mes</div>
             <div class="card-body">
-                {% for m in monthly_trend %}
-                <div class="d-flex align-items-center mb-2">
-                    <span class="small text-muted" style="width: 90px;">{{ m.month }}</span>
-                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ m.bar_width }}%;"></div>
-                    </div>
-                    <span class="small" style="width: 40px;">{{ m.count }}</span>
+                {% if monthly_trend %}
+                <div style="height: 220px;">
+                    <canvas id="chartMonthlyTrend"></canvas>
                 </div>
                 {% else %}
                 <p class="text-muted mb-0">No hay matrículas registradas todavía.</p>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -230,17 +224,13 @@
         <div class="card shadow-sm h-100">
             <div class="card-header">Cancelaciones por mes</div>
             <div class="card-body">
-                {% for m in cancellations_trend %}
-                <div class="d-flex align-items-center mb-2">
-                    <span class="small text-muted" style="width: 90px;">{{ m.month }}</span>
-                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
-                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ m.bar_width }}%;"></div>
-                    </div>
-                    <span class="small" style="width: 40px;">{{ m.count }}</span>
+                {% if cancellations_trend %}
+                <div style="height: 220px;">
+                    <canvas id="chartCancellationsTrend"></canvas>
                 </div>
                 {% else %}
                 <p class="text-muted mb-0">No hay cancelaciones registradas todavía.</p>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -279,4 +269,162 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const ACCENT = "#0F6E66";
+    const ACCENT_SOFT = "rgba(15, 110, 102, 0.75)";
+    const DANGER = "#B54432";
+    const DANGER_SOFT = "rgba(181, 68, 50, 0.75)";
+    const GRID_COLOR = "rgba(28, 36, 38, 0.08)";
+
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+    Chart.defaults.color = "#64767A";
+
+    // Usuarios por rol (donut)
+    new Chart(document.getElementById("chartUsersByRole"), {
+        type: "doughnut",
+        data: {
+            labels: ["Estudiantes", "Docentes", "Administradores"],
+            datasets: [{
+                data: [
+                    {{ kpis.users_by_role.get("student", 0) }},
+                    {{ kpis.users_by_role.get("instructor", 0) }},
+                    {{ kpis.users_by_role.get("admin", 0) }}
+                ],
+                backgroundColor: [ACCENT, "#4A9A92", "#B7D9D5"],
+                borderWidth: 0,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "right", labels: { boxWidth: 10, font: { size: 11 } } } },
+        },
+    });
+
+    {% if top_courses %}
+    // Cursos mas demandados (barra horizontal, click navega al detalle)
+    const topCoursesUrls = [
+        {% for c in top_courses %}"{{ url_for('reports.course_detail', course_id=c.id) }}"{% if not loop.last %},{% endif %}{% endfor %}
+    ];
+    new Chart(document.getElementById("chartTopCourses"), {
+        type: "bar",
+        data: {
+            labels: [{% for c in top_courses %}{{ c.title|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: "Ocupación (%)",
+                data: [{% for c in top_courses %}{{ c.fill_rate }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: ACCENT_SOFT,
+                borderRadius: 4,
+                maxBarThickness: 22,
+            }],
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: (evt, elements) => {
+                if (elements.length) window.location.href = topCoursesUrls[elements[0].index];
+            },
+            onHover: (evt, elements) => {
+                evt.native.target.style.cursor = elements.length ? "pointer" : "default";
+            },
+            scales: {
+                x: { beginAtZero: true, max: 100, grid: { color: GRID_COLOR } },
+                y: { grid: { display: false } },
+            },
+            plugins: { legend: { display: false } },
+        },
+    });
+    {% endif %}
+
+    {% if at_risk_courses %}
+    // Cursos con cupo critico (barra horizontal, click navega al detalle)
+    const atRiskUrls = [
+        {% for c in at_risk_courses %}"{{ url_for('reports.course_detail', course_id=c.id) }}"{% if not loop.last %},{% endif %}{% endfor %}
+    ];
+    new Chart(document.getElementById("chartAtRiskCourses"), {
+        type: "bar",
+        data: {
+            labels: [{% for c in at_risk_courses %}{{ c.title|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: "Ocupación (%)",
+                data: [{% for c in at_risk_courses %}{{ c.fill_rate }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: DANGER_SOFT,
+                borderRadius: 4,
+                maxBarThickness: 22,
+            }],
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: (evt, elements) => {
+                if (elements.length) window.location.href = atRiskUrls[elements[0].index];
+            },
+            onHover: (evt, elements) => {
+                evt.native.target.style.cursor = elements.length ? "pointer" : "default";
+            },
+            scales: {
+                x: { beginAtZero: true, max: 100, grid: { color: GRID_COLOR } },
+                y: { grid: { display: false } },
+            },
+            plugins: { legend: { display: false } },
+        },
+    });
+    {% endif %}
+
+    {% if monthly_trend %}
+    new Chart(document.getElementById("chartMonthlyTrend"), {
+        type: "bar",
+        data: {
+            labels: [{% for m in monthly_trend %}{{ m.month|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: "Matrículas",
+                data: [{% for m in monthly_trend %}{{ m.count }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: ACCENT_SOFT,
+                borderRadius: 4,
+                maxBarThickness: 36,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: GRID_COLOR } },
+                x: { grid: { display: false } },
+            },
+            plugins: { legend: { display: false } },
+        },
+    });
+    {% endif %}
+
+    {% if cancellations_trend %}
+    new Chart(document.getElementById("chartCancellationsTrend"), {
+        type: "bar",
+        data: {
+            labels: [{% for m in cancellations_trend %}{{ m.month|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: "Cancelaciones",
+                data: [{% for m in cancellations_trend %}{{ m.count }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: DANGER_SOFT,
+                borderRadius: 4,
+                maxBarThickness: 36,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: GRID_COLOR } },
+                x: { grid: { display: false } },
+            },
+            plugins: { legend: { display: false } },
+        },
+    });
+    {% endif %}
+})();
+</script>
 {% endblock %}
