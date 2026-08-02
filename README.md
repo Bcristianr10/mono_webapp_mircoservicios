@@ -37,6 +37,31 @@ servicio (`micro_db_user`, `micro_app_courses`, `rabbitmq`, etc.), sin depender 
    docker compose version
    ```
 
+## Si en esta máquina ya corre el monolito EduFlex
+
+Si ya desplegaste el monolito siguiendo `B_Guia_Practica_Dockers_Monolitico.pdf`, esta
+máquina **ya tiene** la red `ADSL` y un reverse proxy (`nginx-proxy` + `dnsmasq`)
+sirviendo `mono.lms.local`. No hay que crear una segunda instancia de ninguno de los
+dos — solo un proceso puede escuchar el puerto 80, y la red debe ser una sola para que
+todo se resuelva por nombre de servicio.
+
+Verifica lo que ya existe antes de levantar nada:
+```bash
+docker network ls | grep ADSL              # deberia listar la red ya creada
+docker ps | grep nginx-proxy               # el reverse proxy del monolito
+```
+
+`levantar_todo.sh` ya detecta esto automáticamente: si encuentra un contenedor con
+imagen `nginx-proxy` corriendo, **no** levanta el `reverse_proxy/` de esta carpeta, y
+si la red `ADSL` ya existe, tampoco intenta crearla de nuevo — solo conecta los
+microservicios nuevos a lo que ya está.
+
+Lo único que falta verificar es el DNS: si el `dnsmasq` del monolito ya resuelve
+`*.lms.local` como comodín, los nuevos dominios (`users.lms.local`,
+`courses.lms.local`, etc.) van a funcionar solos. Si en cambio resuelve nombres
+puntuales, hay que agregar los 5 nuevos a esa configuración (o al hosts file, ver
+abajo) además del `mono.lms.local` que ya tenía.
+
 ## Resolución de dominios (`*.lms.local`)
 
 El proyecto usa dominios locales para separar cada servicio (`users.lms.local`,
@@ -71,15 +96,17 @@ chmod +x levantar_todo.sh
 ./levantar_todo.sh
 ```
 
-Esto crea la red `ADSL` (si no existe) y levanta, en orden, `reverse_proxy` →
+Esto crea la red `ADSL` (si no existe ya) y levanta, en orden, `reverse_proxy` →
 `micro_dbs` → `message_broker` → `micro_webapp` (con build) → `micro_bff_app` (con
-build).
+build) — saltándose la red y el reverse proxy si detecta que ya existen (por ejemplo,
+por el monolito).
 
-Si prefieres hacerlo a mano, en este orden:
+Si prefieres hacerlo a mano, en este orden (omite el `docker network create` y el
+`reverse_proxy` si ya existen):
 ```bash
-docker network create --driver bridge ADSL --subnet=172.30.0.0/16   # una sola vez
+docker network create --driver bridge ADSL --subnet=172.30.0.0/16   # solo si no existe
 
-cd reverse_proxy      && docker compose up -d
+cd reverse_proxy      && docker compose up -d                        # solo si no hay uno corriendo
 cd ../micro_dbs        && docker compose up -d
 cd ../message_broker   && docker compose up -d
 cd ../micro_webapp     && docker compose up -d --build
@@ -97,6 +124,19 @@ curl -I http://micro.lms.local/login        # 200
 Abre `http://micro.lms.local` en el navegador para usar la webapp, y
 `http://localhost:15672` (usuario `eduflex` / clave `eduflexRabbit1`) para ver la
 consola de RabbitMQ.
+
+## Puertos a verificar si ya hay otras cosas corriendo
+
+Antes de levantar, confirma que estos puertos estén libres en el host (o identifica
+qué los usa, si es el propio monolito):
+
+```bash
+sudo ss -lntp | grep -E ":80|:5432|:5433|:5434|:5435|:5436|:5672|:15672"
+```
+
+`micro_dbs` publica en 5433-5436 (a propósito, para no chocar con un Postgres del
+monolito que normalmente usaría 5432). Si el monolito sí publica algo en esos rangos,
+hay que ajustar los puertos en `micro_dbs/docker-compose.yml` antes de levantarlo.
 
 ## Notas importantes
 

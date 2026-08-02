@@ -9,11 +9,17 @@ echo "== Verificando red ADSL =="
 if ! docker network inspect ADSL >/dev/null 2>&1; then
     docker network create --driver bridge ADSL --subnet=172.30.0.0/16
 else
-    echo "La red ADSL ya existe."
+    echo "La red ADSL ya existe (reutilizando, por ejemplo, la del monolito)."
 fi
 
-echo "== Levantando reverse_proxy =="
-(cd "$ROOT/reverse_proxy" && docker compose up -d)
+echo "== Verificando reverse proxy =="
+if docker ps --format '{{.Image}}' | grep -q "nginx-proxy"; then
+    echo "Ya hay un reverse proxy corriendo (probablemente el del monolito) - no se crea otro."
+    echo "Solo se necesita que los contenedores nuevos esten en la red ADSL con su VIRTUAL_HOST."
+else
+    echo "No se detecto ningun reverse proxy activo, levantando el propio."
+    (cd "$ROOT/reverse_proxy" && docker compose up -d)
+fi
 
 echo "== Levantando micro_dbs =="
 (cd "$ROOT/micro_dbs" && docker compose up -d)
